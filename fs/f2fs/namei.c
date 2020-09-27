@@ -371,7 +371,6 @@ static int f2fs_link(struct dentry *old_dentry, struct inode *dir,
 	struct f2fs_sb_info *sbi = F2FS_I_SB(dir);
 	int err;
 
-<<<<<<< HEAD
 	if (unlikely(f2fs_cp_error(sbi)))
 		return -EIO;
 	if (!f2fs_is_checkpoint_ready(sbi))
@@ -380,11 +379,6 @@ static int f2fs_link(struct dentry *old_dentry, struct inode *dir,
 	err = fscrypt_prepare_link(old_dentry, dir, dentry);
 	if (err)
 		return err;
-=======
-	if (f2fs_encrypted_inode(dir) &&
-			!fscrypt_has_permitted_context(dir, inode))
-		return -EXDEV;
->>>>>>> 4d6d4ed1758f (fscrypt: return -EXDEV for incompatible rename or link into encrypted dir)
 
 	if (is_inode_flag_set(dir, FI_PROJ_INHERIT) &&
 			(!projid_eq(F2FS_I(dir)->i_projid,
