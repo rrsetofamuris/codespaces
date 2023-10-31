@@ -1,6 +1,13 @@
 # SPDX-License-Identifier: GPL-2.0
 menu "Device Drivers"
 
+#+bug621774, liuguohua.wt, add, 20200120, add project macro
+config WT_PROJECT_S96717RA1
+	bool "Define for S96717RA1"
+ 	help
+ 	  Say Y here for distinguish different projects
+#-bug621774, liuguohua.wt, add, 20200120, add project macro
+
 source "drivers/amba/Kconfig"
 
 source "drivers/base/Kconfig"
@@ -56,6 +63,8 @@ source "drivers/input/Kconfig"
 source "drivers/char/Kconfig"
 
 source "drivers/i2c/Kconfig"
+
+source "drivers/i3c/Kconfig"
 
 source "drivers/spi/Kconfig"
 
@@ -221,5 +230,18 @@ source "drivers/siox/Kconfig"
 
 source "drivers/slimbus/Kconfig"
 
+source "drivers/interconnect/Kconfig"
+
 source "drivers/energy_model/Kconfig"
+
+source "drivers/muic/Kconfig"
+
+source "drivers/switch/Kconfig"
+
+source "drivers/battery/Kconfig"
+
+source "drivers/sensors/Kconfig"
+
+source "drivers/samsung/Kconfig"
+
 endmenu

@@ -475,7 +475,8 @@ static int sun4i_usb_phy_power_off(struct phy *_phy)
 	return 0;
 }
 
-static int sun4i_usb_phy_set_mode(struct phy *_phy, enum phy_mode mode)
+static int sun4i_usb_phy_set_mode(struct phy *_phy,
+				  enum phy_mode mode, int submode)
 {
 	struct sun4i_usb_phy *phy = phy_get_drvdata(_phy);
 	struct sun4i_usb_phy_data *data = to_sun4i_usb_phy_data(phy);
@@ -723,8 +724,11 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
 	}
 
 	if (of_find_property(np, "usb0_vbus_power-supply", NULL)) {
-		data->vbus_power_supply = devm_power_supply_get_by_phandle(dev,
-						     "usb0_vbus_power-supply");
+		if (data->vbus_power_supply == NULL) {
+			data->vbus_power_supply = devm_power_supply_get_by_phandle(dev,
+							     "usb0_vbus_power-supply");
+			
+		}
 		if (IS_ERR(data->vbus_power_supply)) {
 			dev_err(dev, "Couldn't get the VBUS power supply\n");
 			return PTR_ERR(data->vbus_power_supply);

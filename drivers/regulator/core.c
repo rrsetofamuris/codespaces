@@ -4875,8 +4875,8 @@ static int regulator_late_cleanup(struct device *dev, void *data)
 
 	if (!enabled)
 		goto unlock;
-
-	if (have_full_constraints()) {
+	//extb P210707-04277, xuweijiang.wt, keep vbus detect Pen Driver after restarting
+	if (have_full_constraints()&& strcmp(rdev->desc->name, "usb-otg-vbus")) {
 		/* We log since this may kill the system if it goes
 		 * wrong. */
 		rdev_info(rdev, "disabling\n");

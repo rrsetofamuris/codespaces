@@ -40,6 +40,7 @@
 
 static struct device_attribute power_supply_attrs[];
 
+
 static const char * const power_supply_type_text[] = {
 	"Unknown", "Battery", "UPS", "Mains", "USB",
 	"USB_DCP", "USB_CDP", "USB_ACA", "USB_C",
@@ -47,6 +48,13 @@ static const char * const power_supply_type_text[] = {
 	"USB_HVDCP", "USB_HVDCP_3", "USB_HVDCP_3P5", "Wireless", "USB_FLOAT",
 	"BMS", "Parallel", "Main", "USB_C_UFP", "USB_C_DFP",
 	"Charge_Pump",
+	//+Bug 623222, yaocankun.wt, ADD, 20210222, add OTG type
+	#ifdef CONFIG_WT_PROJECT_S96717RA1
+	"OTG",
+	#else
+	"otg", //Bug615303,xuejizhou.wt,ADD,20200107,OTG status
+	#endif
+	//-Bug 623222, yaocankun.wt, ADD, 20210222, add OTG type
 };
 
 static const char * const power_supply_usb_type_text[] = {
@@ -223,6 +231,11 @@ static ssize_t power_supply_show_property(struct device *dev,
 	case POWER_SUPPLY_PROP_MODEL_NAME ... POWER_SUPPLY_PROP_SERIAL_NUMBER:
 		ret = sprintf(buf, "%s\n", value.strval);
 		break;
+	//+Bug615300,xuejizhou.wt,ADD,20200104,charging type report,Fast or Slow
+	case POWER_SUPPLY_PROP_NEW_CHARGE_TYPE:
+		ret = sprintf(buf, "%s\n", value.strval);
+		break;
+	//-Bug615300,xuejizhou.wt,ADD,20200104,charging type report,Fast or Slow
 	default:
 		ret = sprintf(buf, "%d\n", value.intval);
 	}
@@ -234,6 +247,7 @@ static ssize_t power_supply_store_property(struct device *dev,
 					   struct device_attribute *attr,
 					   const char *buf, size_t count) {
 	ssize_t ret;
+	int x = 0;
 	struct power_supply *psy = dev_get_drvdata(dev);
 	enum power_supply_property psp = attr - power_supply_attrs;
 	union power_supply_propval value;
@@ -265,17 +279,25 @@ static ssize_t power_supply_store_property(struct device *dev,
 	 * If no match was found, then check to see if it is an integer.
 	 * Integer values are valid for enums in addition to the text value.
 	 */
-	if (ret < 0) {
-		long long_val;
+//+bug 615299,xuejizhou.wt,ADD,20201228, battery SOC limitation for store mode
+	if (psp == POWER_SUPPLY_PROP_STORE_MODE) {
+	 if (sscanf(buf, "%10d\n", &x) == 1) {
+	  pr_err("#### power_supply_store_property x(%d)\n", x );
+	  value.intval = x;
+	 }
+	} else {
+		if (ret < 0) {
+			long long_val;
 
-		ret = kstrtol(buf, 10, &long_val);
-		if (ret < 0)
-			return ret;
+			ret = kstrtol(buf, 10, &long_val);
+			if (ret < 0)
+				return ret;
 
-		ret = long_val;
+			ret = long_val;
+		}
+		value.intval = ret;
 	}
-
-	value.intval = ret;
+//-bug 615299,xuejizhou.wt,ADD,20201228, battery SOC limitation for store mode
 
 	ret = power_supply_set_property(psy, psp, &value);
 	if (ret < 0)
@@ -343,7 +365,6 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(temp_ambient_alert_max),
 	POWER_SUPPLY_ATTR(time_to_empty_now),
 	POWER_SUPPLY_ATTR(time_to_empty_avg),
-	POWER_SUPPLY_ATTR(time_to_full_now),
 	POWER_SUPPLY_ATTR(time_to_full_avg),
 	POWER_SUPPLY_ATTR(type),
 	POWER_SUPPLY_ATTR(usb_type),
@@ -351,6 +372,29 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(precharge_current),
 	POWER_SUPPLY_ATTR(charge_term_current),
 	POWER_SUPPLY_ATTR(calibrate),
+	POWER_SUPPLY_ATTR(batt_misc_event),//Bug615305,xujizhou.wt,ADD,20210108,battery misc event
+	POWER_SUPPLY_ATTR(batt_current_ua_now),//Bug615306,xuejizhou.wt,ADD,20200104,battery Current Consumption
+	POWER_SUPPLY_ATTR(new_charge_type),//Bug615300,xuejizhou.wt,ADD,20200104,charging type report,Fast or Slow
+	POWER_SUPPLY_ATTR(hv_charger_status),//Bug 615301,xuejizhou.wt,ADD,20210115,hv charger status
+	POWER_SUPPLY_ATTR(store_mode),//bug 615298,xuejizhou.wt,ADD,20201228, battery SOC limitation for store mode
+	//+Bug 615302,xuejizhou.wt,ADD,20210113,battery Current event and slate mode
+	POWER_SUPPLY_ATTR(batt_slate_mode),
+	#if defined(CONFIG_CHARGER_BQ2415X) || defined(CONFIG_WT_PROJECT_S96717RA1)
+	POWER_SUPPLY_ATTR(batt_current_event),
+	POWER_SUPPLY_ATTR(battery_cycle),//chk 80637,xuejizhou.wt,ADD,20210203,battery protect
+	#endif
+	//-Bug 615302,xuejizhou.wt,ADD,20210113,battery Current event and slate mode
+	//+Bug 623286, yaocankun.wt,add, 20210202, Charging afc flag
+#ifdef CONFIG_AFC_CHARGER
+	POWER_SUPPLY_ATTR(afc_flag),
+#endif
+	//-Bug 623286, yaocankun.wt,add, 20210202, Charging afc flag
+	//+Bug 623299, yaocankun.wt, add, 20210219, add battery hv disable
+	#ifdef CONFIG_WT_PROJECT_S96717RA1
+	POWER_SUPPLY_ATTR(hv_disable),
+	POWER_SUPPLY_ATTR(typec_cc_orientation),
+	#endif
+	//-Bug 623299, yaocankun.wt, add, 20210219, add battery hv disable
 	/* Local extensions */
 	POWER_SUPPLY_ATTR(usb_hc),
 	POWER_SUPPLY_ATTR(usb_otg),

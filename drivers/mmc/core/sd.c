@@ -1193,8 +1193,16 @@ out:
  */
 static int mmc_sd_resume(struct mmc_host *host)
 {
+	int err = 0;
+
+#ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
+	err = _mmc_sd_resume(host);
+	pm_runtime_set_active(&host->card->dev);
+	pm_runtime_mark_last_busy(&host->card->dev);
+#endif
 	pm_runtime_enable(&host->card->dev);
-	return 0;
+
+	return err;
 }
 
 /*
@@ -1221,6 +1229,9 @@ static int mmc_sd_runtime_suspend(struct mmc_host *host)
 static int mmc_sd_runtime_resume(struct mmc_host *host)
 {
 	int err;
+
+	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+		return 0;
 
 	err = _mmc_sd_resume(host);
 	if (err && err != -ENOMEDIUM)
@@ -1316,6 +1327,8 @@ err:
 	mmc_detach_bus(host);
 
 	pr_err("%s: error %d whilst initialising SD card\n",
+		mmc_hostname(host), err);
+	ST_LOG("%s: error %d whilst initialising SD card\n",
 		mmc_hostname(host), err);
 
 	return err;
