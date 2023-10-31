@@ -90,6 +90,9 @@ struct disk_stats {
 	unsigned long merges[NR_STAT_GROUPS];
 	unsigned long io_ticks;
 	unsigned long time_in_queue;
+	unsigned long discard_sectors;
+	unsigned long discard_ios;
+	unsigned long flush_ios;
 };
 
 #define PARTITION_META_INFO_VOLNAMELTH	64
