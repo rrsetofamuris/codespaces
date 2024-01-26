@@ -44,7 +44,7 @@ rissu_build() {
 		printf "~ Missing folder: Rissu, using OEM instead ..\n";
 		oem_build;
 	else
-		printf "${HIGHLIGHT}@@ $(pwd)/arch/arm64/configs/rissu${UNHIGHLIGHT}\n";
+		printf "${HIGHLIGHT}@@ $(pwd)/arch/$ARCH/configs/rissu${UNHIGHLIGHT}\n";
 		ls $(pwd)/arch/$ARCH/configs/rissu;
 		printf "\n";
 	fi
@@ -53,12 +53,12 @@ rissu_build() {
 	
 	if [[ $TARGET_DEV = 'cis' ]]; then
 		printf "\n${BOLD}~ You selected: $TARGET_DEV\n\n";
-		printf "${HIGHLIGHT}@@ $(pwd)/arch/arm64/configs/rissu/cis${UNHIGHLIGHT}\n";
+		printf "${HIGHLIGHT}@@ $(pwd)/arch/$ARCH/configs/rissu/cis${UNHIGHLIGHT}\n";
 		ls $(pwd)/arch/$ARCH/configs/rissu/cis;
 		printf "\n";
 	elif [[ $TARGET_DEV = 'ltn' ]]; then
 		printf "\n${BOLD}~ You selected: $TARGET_DEV\n\n";
-		printf "${HIGHLIGHT}@@ $(pwd)/arch/arm64/configs/rissu/ltn${UNHIGHLIGHT}\n";
+		printf "${HIGHLIGHT}@@ $(pwd)/arch/$ARCH/configs/rissu/ltn${UNHIGHLIGHT}\n";
 		ls $(pwd)/arch/$ARCH/configs/rissu/ltn;
 		printf "\n";
 	elif [[ $TARGET_DEV = '' ]]; then
@@ -85,7 +85,7 @@ oem_build() {
 		printf "~ Fatal, oem configs not found, abort! ..\n";
 		exit;
 	else
-		printf "${HIGHLIGHT}@@ $(pwd)/arch/arm64/configs/vendor ${UNHIGHLIGHT}\n";
+		printf "${HIGHLIGHT}@@ $(pwd)/arch/$ARCH/configs/vendor ${UNHIGHLIGHT}\n";
 		ls $(pwd)/arch/$ARCH/configs/vendor;
 		printf "\n";
 	fi
