@@ -54,14 +54,14 @@ bash $(pwd)/Rissu/ksu_fetch.sh
 +# CONFIG_KSU_DEBUG is not set # if you a dev, then turn on this option for KernelSU debugging.
 ```
 #### 3. Edit these file:
-- **NOTE: KernelSU depends on these symbols:**
-	- ```do_execveat_common```
-	- ```faccessat```
-	- ```vfs_read```
-	- ```vfs_statx```
-	- ```input_handle_event```
+- **NOTE: 4.14 KernelSU patches is depends on these symbols:**
+	- `do_execveat_common`
+	- `faccessat`
+	- `vfs_read`
+	- `vfs_statx`
+	- `input_handle_event`
 
-- **fs/exec.c**
+- `do_execveat_common` at **fs/exec.c**
 ```diff
  /*
   * sys_execve() executes a new program.
@@ -93,7 +93,7 @@ static int do_execveat_common(int fd, struct filename *filename,
  	if (IS_ERR(filename))
  		return PTR_ERR(filename);
 ```
-- **fs/open.c**
+- `faccessat` at **fs/open.c**
 ```diff
 /*
  * access() needs to use the real uid/gid, not the effective uid/gid.
@@ -122,7 +122,7 @@ SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
  	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
  		return -EINVAL;
 ```
-- **fs/read_write.c**
+- `vfs_read` at **fs/read_write.c**
 ```diff
 +#ifdef CONFIG_KSU
 +extern bool ksu_vfs_read_hook __read_mostly;
@@ -142,7 +142,7 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
  	if (!(file->f_mode & FMODE_READ))
  		return -EBADF;
 ```
-- **fs/stat.c**
+- `vfs_statx` at **fs/stat.c**
 ```diff
 +#ifdef CONFIG_KSU
 +extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
@@ -163,7 +163,7 @@ int vfs_statx(int dfd, const char __user *filename, int flags,
  		       AT_EMPTY_PATH | KSTAT_QUERY_FLAGS)) != 0)
  		return -EINVAL;
 ```
-- **drivers/input/input.c**
+- `input_handle_event` at **drivers/input/input.c**
 ```diff
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
