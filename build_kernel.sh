@@ -46,6 +46,7 @@ export BSP_BUILD_ANDROID_OS=y
 
 # Take logs functions
 get_log() {
+	printf "\n\nRISSU KERNEL BUILD SCRIPT LOGS\n\n" > build_logs.log
 	echo "-- Kernel Build started at: `date`" > build_logs.log
 	echo "PLATFORM=$BSP_BUILD_FAMILY" > build_logs.log
 	echo "MODEL=$TARGET_DEVICE" > build_logs.log
