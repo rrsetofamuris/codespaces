@@ -1,7 +1,8 @@
 #! /bin/sh
 
 # Rissu Project (C) 2024
-# Basically unpack libart.so
+# Basically, just bypass GitLab or Github
+# 100 MB Max files.
 
 cd ..
 
@@ -12,9 +13,7 @@ KERNEL_ROOT="$(pwd)"
 USE_TAR=n
 
 check_files() {
-	if [ -f $KERNEL_ROOT/tools/lib64/libart.so ] || [ -f $KERNEL_ROOT/tools/lib64/libart-compiler.so ] || [ -f $KERNEL_ROOT/tools/lib64/libplatformprotos.so ]; then
-		printf "";
-	else
+	if ! [ -f $KERNEL_ROOT/tools/lib64/libart.so ] || [ -f $KERNEL_ROOT/tools/lib64/libart-compiler.so ] || [ -f $KERNEL_ROOT/tools/lib64/libplatformprotos.so ]; then
 		check_directory;
 	fi
 }
@@ -87,6 +86,7 @@ use_system_unzip() {
 	unzip $RISSU_ROOT/vendor/sprd/libart-compiler.zip -d $KERNEL_ROOT/tools/lib64 2>/dev/null
 	unzip $RISSU_ROOT/vendor/sprd/libplatformprotos.zip -d $KERNEL_ROOT/tools/lib64 2>/dev/null
 }
+#END OF ZIP
 
 execute() {
 	check_files;
