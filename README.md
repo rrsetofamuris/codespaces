@@ -195,5 +195,6 @@ A: Make sure symlinked ksu folder are there.
 A: Check out/drivers/kernelsu, if everything not compiled then, check drivers/Makefile, make sure ```obj-$(CONFIG_KSU) += kernelsu/``` are there.
 ## D. Credit
 - [Rissu](https://github.com/rsuntk) - Unified Kernel Tree
+- [gauravv-x1](https://gitlab.com/gauravv-x1) - A03 Developer and Tester
 - [KernelSU](https://kernelsu.org) - A kernel-based root solution for Android
 
