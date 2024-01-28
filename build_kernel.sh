@@ -44,6 +44,14 @@ export DTC_OVERLAY_TEST_EXT=$(pwd)/tools/mkdtimg/ufdt_apply_overlay
 export DTC_OVERLAY_VTS_EXT=$(pwd)/tools/mkdtimg/ufdt_verify_overlay_host
 export BSP_BUILD_ANDROID_OS=y
 
+# Take logs functions
+get_log() {
+	echo "-- Kernel Build started at: `date`" > build_logs.log
+	echo "PLATFORM=$BSP_BUILD_FAMILY" > build_logs.log
+	echo "MODEL=$TARGET_DEVICE" > build_logs.log
+	echo "DEFCONFIG=$DEFCONFIG" > build_logs.log
+}
+
 # Rissu defconfig target
 rissu_build() {
 	if ! test -d $(pwd)/arch/$ARCH/configs/rissu; then
@@ -82,6 +90,7 @@ rissu_build() {
 	read -p "TOTAL_THREAD=" TOTAL_THREAD;
 	
 	printf "\n~ Selected defconfig: $DEFCONFIG\n"
+	get_log;
 	make -C $(pwd) O=$(pwd)/out BSP_BUILD_DT_OVERLAY=y CC=clang LD=ld.lld ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- $(echo rissu/$TARGET_DEV/$DEFCONFIG)
 	make -C $(pwd) O=$(pwd)/out BSP_BUILD_DT_OVERLAY=y CC=clang LD=ld.lld ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- -j$(echo $TOTAL_THREAD)
 }
@@ -103,6 +112,7 @@ oem_build() {
 	read -p "TOTAL_THREAD=" TOTAL_THREAD;
 	
 	printf "\n~ Selected defconfig: $DEFCONFIG\n"
+	get_log;
 	make -C $(pwd) O=$(pwd)/out BSP_BUILD_DT_OVERLAY=y CC=clang LD=ld.lld ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- $(echo vendor/$DEFCONFIG)
 	make -C $(pwd) O=$(pwd)/out BSP_BUILD_DT_OVERLAY=y CC=clang LD=ld.lld ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- -j$(echo $TOTAL_THREAD)
 }
@@ -117,11 +127,14 @@ if test -f $(pwd)/out/arch/$ARCH/boot/Image; then
 	cp out/arch/arm64/boot/Image $(pwd)/Image_$ID
 	printf "${GREEN}[√] The result is: Completed.\n\n";
 	printf "[i] Completed at: `date`\n";
+	# Add logs:
+	printf "Completed at: `date`\n" > build_logs.log
 	printf "[i] Kernel Version: $(make kernelversion)\n";
 	printf "[i] Kernel: $(pwd)/Image_$ID ${NC}\n";
 else
 	printf "${GREEN}[X] The result is: Failed.\n\n";
 	printf "[i] Failed at: `date`\n";
+	printf "Failed at: `date`\n" > build_logs.log
 	printf "[i] Kernel Version: $(make kernelversion)\n";
 	printf "[i] Kernel: -\n";
 	exit;
