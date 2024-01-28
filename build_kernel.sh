@@ -12,12 +12,17 @@ RED='\033[1;31m'
 NC='\033[0m'
 BOLD=$(tput bold)
 
+# Unisoc apparently didn't allow dirty build. only clean build.
+# So we need to remove the out folder.
 if test -d $(pwd)/out; then
 	printf "~ out folder detected! Deleting ...\n";
 	rm -rR out -f;
 	make clean && make mrproper;
 fi
 
+# This (rissu) folder is contains very important sprd libraries.
+# libart.so, libart-compiler.so and libplatformprotos.so
+# So, if this folder didn't exist, well, compilation failed.
 printf "~ Checking if Rissu Folder exist ...\n";
 
 if ! test -d $(pwd)/Rissu; then
@@ -29,16 +34,17 @@ else
 	cd ..
 fi
 
+# Export important variable!
 export CROSS_COMPILE=$(pwd)/toolchain/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-
 export ARCH=arm64
 export CLANG_TOOL_PATH=$(pwd)/toolchain/clang/host/linux-x86/clang-r383902/bin/
 export PATH=${CLANG_TOOL_PATH}:${PATH//"${CLANG_TOOL_PATH}:"}
-
 export BSP_BUILD_FAMILY=qogirl6
 export DTC_OVERLAY_TEST_EXT=$(pwd)/tools/mkdtimg/ufdt_apply_overlay
 export DTC_OVERLAY_VTS_EXT=$(pwd)/tools/mkdtimg/ufdt_verify_overlay_host
 export BSP_BUILD_ANDROID_OS=y
 
+# Rissu defconfig target
 rissu_build() {
 	if ! test -d $(pwd)/arch/$ARCH/configs/rissu; then
 		printf "~ Missing folder: Rissu, using OEM instead ..\n";
@@ -80,6 +86,7 @@ rissu_build() {
 	make -C $(pwd) O=$(pwd)/out BSP_BUILD_DT_OVERLAY=y CC=clang LD=ld.lld ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- -j$(echo $TOTAL_THREAD)
 }
 
+# Samsung/OEM defconfig Target
 oem_build() {
 	if ! test -d $(pwd)/arch/$ARCH/configs/vendor; then
 		printf "~ Fatal, oem configs not found, abort! ..\n";
@@ -100,8 +107,11 @@ oem_build() {
 	make -C $(pwd) O=$(pwd)/out BSP_BUILD_DT_OVERLAY=y CC=clang LD=ld.lld ARCH=arm64 CLANG_TRIPLE=aarch64-linux-gnu- -j$(echo $TOTAL_THREAD)
 }
 
+# Execute the rissu build first.
 rissu_build;
 
+# After the Kernel is compiled, it will copy the file to the Kernel Root.
+# Image_183929 <- By ID=$RANDOM
 ID=$RANDOM
 if test -f $(pwd)/out/arch/$ARCH/boot/Image; then
 	cp out/arch/arm64/boot/Image $(pwd)/Image_$ID
